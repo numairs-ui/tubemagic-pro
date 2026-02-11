@@ -3,12 +3,26 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LucideCreditCard, LucideShield, LucideBell, LucideLoader2, LucideCheckCircle2, LucideInfo } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useSearchParams } from "next/navigation"
 
 export default function SettingsPage() {
+    return (
+        <div className="space-y-8 max-w-4xl">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+                <p className="text-slate-500 text-lg">Manage your account, subscription, and notifications.</p>
+            </div>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><LucideLoader2 className="w-8 h-8 animate-spin text-slate-300" /></div>}>
+                <SettingsContent />
+            </Suspense>
+        </div>
+    )
+}
+
+function SettingsContent() {
     const searchParams = useSearchParams()
     const [isLoading, setIsLoading] = useState(true)
     const [isUpgrading, setIsUpgrading] = useState(false)
@@ -92,12 +106,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="space-y-8 max-w-4xl">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-                <p className="text-slate-500 text-lg">Manage your account, subscription, and notifications.</p>
-            </div>
-
+        <>
             {successMessage && (
                 <div className="p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3 text-green-700 animate-in fade-in slide-in-from-top-2 duration-500">
                     <LucideCheckCircle2 className="w-5 h-5" />
@@ -197,6 +206,6 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </>
     )
 }
