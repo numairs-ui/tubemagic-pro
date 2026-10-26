@@ -5,6 +5,10 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-ink: var(--ink);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -48,6 +52,11 @@
 
 :root {
   --radius: 0.625rem;
+  /* TubeMagic Velocity brand */
+  --brand: #ff642d;
+  --brand-hover: #e85a28;
+  --brand-soft: #fff2ed;
+  --ink: #0f172a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -121,5 +130,14 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Respect reduced-motion for every micro-interaction in the app. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

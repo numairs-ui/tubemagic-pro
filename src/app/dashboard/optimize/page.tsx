@@ -1,8 +1,9 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LucideZap, LucideSparkles, LucideWand2, LucideLoader2, LucidePlus, LucideChevronRight } from "lucide-react"
+import { PageHeader } from "@/components/ui/page-header"
+import { LucideZap, LucideSparkles, LucideLoader2, LucideChevronRight, LucideImage, LucideLayers } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -77,7 +78,7 @@ export default function OptimizePage() {
             } else {
                 setError(data.error || "Failed to generate ideas")
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred while connecting to AI.")
         } finally {
             setIsLoadingIdeas(false)
@@ -85,11 +86,12 @@ export default function OptimizePage() {
     }
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">AI Title & SEO Optimizer</h1>
-                <p className="text-slate-500 text-lg">Use GPT-4 to craft viral titles and optimized descriptions.</p>
-            </div>
+        <div className="space-y-8 pb-20">
+            <PageHeader
+                eyebrow="SEO Toolkit"
+                title="Title & SEO Optimizer"
+                description="Rewrite titles, descriptions and tags for an existing video, or brainstorm new ideas for your niche."
+            />
 
             <div className="grid gap-6 md:grid-cols-2">
                 {/* Title Optimization Card */}
@@ -213,18 +215,25 @@ export default function OptimizePage() {
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                        <LucideWand2 className="w-5 h-5 text-slate-400" />
-                        <span>Optimization History</span>
-                    </CardTitle>
-                    <CardDescription>Your recently generated titles and descriptions will appear here.</CardDescription>
-                </CardHeader>
-                <CardContent className="py-12 text-center text-slate-400 italic">
-                    No optimization history yet.
-                </CardContent>
-            </Card>
+            {/* The CTR scorer and repurposer now live in their own studios. */}
+            <div className="grid gap-4 md:grid-cols-2">
+                <Link href="/dashboard/packaging" className="group flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <LucideImage className="h-6 w-6 text-brand" />
+                    <div className="flex-1">
+                        <p className="font-bold text-slate-900">Grade the thumbnail too</p>
+                        <p className="text-sm text-slate-500">Packaging Studio scores title + thumbnail together.</p>
+                    </div>
+                    <LucideChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link href="/dashboard/repurpose" className="group flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <LucideLayers className="h-6 w-6 text-blue-600" />
+                    <div className="flex-1">
+                        <p className="font-bold text-slate-900">Repurpose into Shorts</p>
+                        <p className="text-sm text-slate-500">Hooks, scripts, polls and threads from one video.</p>
+                    </div>
+                    <LucideChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
+                </Link>
+            </div>
         </div>
     )
 }

@@ -1,29 +1,38 @@
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getChannelData, extractChannelIdOrHandle } from '@/lib/youtube'
+import { ApiError, errorResponse, parseBody, requireUserId } from '@/lib/api'
+import { getOwnedChannel } from '@/lib/account'
+import { enforceRateLimit } from '@/lib/rate-limit'
+
+const bodySchema = z.object({
+    channelId: z.string().uuid('Channel ID is required'),
+    competitorInput: z.string().trim().min(2, 'Competitor URL or @handle is required').max(200),
+})
 
 export async function POST(req: Request) {
     try {
-        const { userId } = await auth()
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
+        const userId = await requireUserId()
+        await enforceRateLimit(`competitor-add:${userId}`, 20, 60 * 60)
+        const { channelId, competitorInput } = await parseBody(req, bodySchema)
 
-        const { channelId, competitorInput } = await req.json()
-        if (!channelId || !competitorInput) {
-            return NextResponse.json({ error: 'Channel ID and Competitor Input are required' }, { status: 400 })
-        }
+        // Only the channel's owner may attach competitors to it.
+        const channel = await getOwnedChannel(userId, channelId)
 
         // 1. Resolve competitor handle/URL
         const identifier = extractChannelIdOrHandle(competitorInput)
         const competitorData = await getChannelData(identifier)
 
+        if (competitorData.id === channel.youtube_channel_id) {
+            throw new ApiError(400, 'self_competitor', 'You cannot track your own channel as a competitor.')
+        }
+
         // 2. Save competitor to Supabase
         const { data: competitor, error: competitorError } = await supabaseAdmin
             .from('competitors')
             .insert({
-                channel_id: channelId,
+                channel_id: channel.id,
                 competitor_channel_id: competitorData.id,
                 competitor_name: competitorData.name,
             })
@@ -32,7 +41,7 @@ export async function POST(req: Request) {
 
         if (competitorError) {
             if (competitorError.code === '23505') {
-                return NextResponse.json({ error: 'This channel is already being tracked as a competitor.' }, { status: 400 })
+                throw new ApiError(400, 'duplicate_competitor', 'This channel is already being tracked as a competitor.')
             }
             throw competitorError
         }
@@ -44,10 +53,6 @@ export async function POST(req: Request) {
         })
 
     } catch (error: unknown) {
-        console.error('Add competitor error:', error)
-        return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'Failed to add competitor' },
-            { status: 500 }
-        )
+        return errorResponse(error, 'competitors/add')
     }
 }

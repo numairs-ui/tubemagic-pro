@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getUserChannels } from '@/lib/account'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,14 +16,10 @@ export default async function ChannelDetailsPage({ params }: { params: Promise<{
     const { userId } = await auth()
     if (!userId) redirect('/sign-in')
 
-    // 1. Get channel data
-    const { data: channel, error: channelError } = await supabaseAdmin
-        .from('channels')
-        .select('*')
-        .eq('id', id)
-        .single()
+    // 1. Get channel data (only channels this user owns)
+    const channel = (await getUserChannels(userId)).find((c) => c.id === id)
 
-    if (channelError || !channel) {
+    if (!channel) {
         return (
             <div className="text-center py-20">
                 <h2 className="text-xl font-semibold">Channel not found</h2>
@@ -57,7 +54,7 @@ export default async function ChannelDetailsPage({ params }: { params: Promise<{
                         </Link>
                     </Button>
                     <img
-                        src={channel.thumbnail_url}
+                        src={channel.thumbnail_url ?? undefined}
                         referrerPolicy="no-referrer"
                         className="h-16 w-16 rounded-full border-2 border-white shadow-sm object-cover"
                         alt=""

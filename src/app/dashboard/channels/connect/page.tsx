@@ -62,7 +62,7 @@ export default function ConnectChannelPage() {
         <div className="max-w-2xl mx-auto space-y-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Connect Your Channel</h1>
-                <p className="text-slate-500 text-lg">Find your YouTube channel to start using CodeTube Pro.</p>
+                <p className="text-slate-500 text-lg">Find your YouTube channel to start using TubeMagic Velocity.</p>
             </div>
 
             <Card>

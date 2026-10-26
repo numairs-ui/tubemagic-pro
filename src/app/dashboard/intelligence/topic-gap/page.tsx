@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LucideSparkles, LucideZap, LucideLoader2, LucideTrendingUp, LucideArrowRight, LucideAlertTriangle } from "lucide-react"
@@ -34,7 +34,7 @@ export default function TopicGapPage() {
             } else {
                 setAnalysis(data)
             }
-        } catch (err) {
+        } catch {
             setError("Failed to run analysis. Please try again.")
         } finally {
             setIsLoading(false)
@@ -46,7 +46,7 @@ export default function TopicGapPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-extrabold tracking-tight text-[#0f172a]">Topic Gap Analysis</h1>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-ink">Topic Gap Analysis</h1>
                     <p className="text-slate-500 text-lg font-medium">AI-identified high velocity topics your competitors are winning with.</p>
                 </div>
                 {!analysis && (
@@ -54,7 +54,7 @@ export default function TopicGapPage() {
                         size="lg"
                         onClick={runAnalysis}
                         disabled={isLoading}
-                        className="bg-[#ff642d] hover:bg-[#e85a28] text-white font-bold px-8 h-12 shadow-lg shadow-[#ff642d]/20 rounded-xl"
+                        className="bg-brand hover:bg-brand-hover text-white font-bold px-8 h-12 shadow-lg shadow-brand/20 rounded-xl"
                     >
                         {isLoading ? (
                             <>
@@ -79,7 +79,7 @@ export default function TopicGapPage() {
                         {error}
                         {error.includes("competitors") && (
                             <Button variant="link" className="text-red-700 underline pl-2" asChild>
-                                <a href="/dashboard/settings">Add Competitors</a>
+                                <a href="/dashboard">Add competitors on your channel page</a>
                             </Button>
                         )}
                     </CardContent>
@@ -116,7 +116,7 @@ export default function TopicGapPage() {
             {analysis && (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-[#ff642d] border-[#ff642d]/20 bg-[#fff2ed] px-3 py-1 text-sm font-bold">
+                        <Badge variant="outline" className="text-brand border-brand/20 bg-brand-soft px-3 py-1 text-sm font-bold">
                             {analysis.gaps.length} Gaps Found
                         </Badge>
                         <Button
@@ -131,7 +131,7 @@ export default function TopicGapPage() {
                     <div className="grid grid-cols-1 gap-4">
                         {analysis.gaps.map((gap, i) => (
                             <Card key={i} className="border-none shadow-sm bg-white overflow-hidden hover:shadow-md transition-all duration-300 group">
-                                <div className="h-1 bg-[#ff642d] w-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="h-1 bg-brand w-full opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
                                     {/* Topic & Potential */}
                                     <div className="lg:col-span-1 space-y-3">
@@ -157,14 +157,14 @@ export default function TopicGapPage() {
 
                                     {/* Strategy */}
                                     <div className="lg:col-span-2 border-l pl-6 border-slate-50 bg-slate-50/50 -my-6 py-6 flex flex-col justify-center">
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-[#ff642d] mb-2 flex items-center gap-1">
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-brand mb-2 flex items-center gap-1">
                                             <LucideSparkles className="w-3 h-3" /> AI Strategy Tip
                                         </p>
                                         <p className="text-sm text-slate-700 leading-relaxed font-medium italic">
                                             &quot;{gap.strategy_tip}&quot;
                                         </p>
                                         <div className="mt-4">
-                                            <Button size="sm" className="bg-[#0f172a] text-white hover:bg-slate-800 font-bold text-xs h-8">
+                                            <Button size="sm" className="bg-ink text-white hover:bg-slate-800 font-bold text-xs h-8">
                                                 Create This Video <LucideArrowRight className="w-3 h-3 ml-1.5" />
                                             </Button>
                                         </div>

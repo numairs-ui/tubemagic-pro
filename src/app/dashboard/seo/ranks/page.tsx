@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { LucideBarChart3, LucideTrendingUp, LucidePlus, LucideRefreshCw, LucideAward, LucideHistory } from "lucide-react"
+import { LucideTrendingUp, LucidePlus, LucideRefreshCw, LucideAward, LucideHistory } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RankChart } from "@/components/dashboard/RankChart"
 import Link from "next/link"
@@ -56,9 +56,9 @@ export default async function RankTrackerPage() {
                         className="h-14 w-14 rounded-2xl border-2 border-white shadow-sm object-cover"
                     />
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-[#0f172a]">Rank Tracker</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-ink">Rank Tracker</h1>
                         <p className="text-slate-500 text-lg font-medium">
-                            Monitoring <span className="text-[#0f172a] font-bold">{channel.channel_name}</span> visibility
+                            Monitoring <span className="text-ink font-bold">{channel.channel_name}</span> visibility
                         </p>
                     </div>
                 </div>
@@ -67,7 +67,7 @@ export default async function RankTrackerPage() {
                         <LucideRefreshCw className="w-4 h-4 mr-2" />
                         Sync Ranks
                     </Button>
-                    <Button className="bg-[#ff642d] hover:bg-[#e85a28] h-11 px-6 rounded-xl font-bold shadow-lg shadow-[#ff642d]/20">
+                    <Button className="bg-brand hover:bg-brand-hover h-11 px-6 rounded-xl font-bold shadow-lg shadow-brand/20">
                         <LucidePlus className="w-4 h-4 mr-2" />
                         Track Keyword
                     </Button>
@@ -93,7 +93,7 @@ export default async function RankTrackerPage() {
 
                 {/* Right: Quick Stats */}
                 <div className="space-y-6">
-                    <Card className="border-none shadow-sm bg-[#0f172a] text-white">
+                    <Card className="border-none shadow-sm bg-ink text-white">
                         <CardHeader className="pb-2">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Winners & Losers</span>
                         </CardHeader>
@@ -137,7 +137,7 @@ export default async function RankTrackerPage() {
 
             {/* Keyword Table */}
             <div className="space-y-4">
-                <h2 className="text-xl font-bold text-[#0f172a]">Active Tracking</h2>
+                <h2 className="text-xl font-bold text-ink">Active Tracking</h2>
                 <div className="bg-white border-none shadow-sm rounded-xl overflow-hidden">
                     <table className="w-full text-left">
                         <thead>
@@ -160,7 +160,7 @@ export default async function RankTrackerPage() {
                                     <td className="px-6 py-4 text-sm font-bold text-center">#{row.pos}</td>
                                     <td className={`px-6 py-4 text-xs font-bold text-center ${row.color}`}>{row.change}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-slate-400 hover:text-[#ff642d] hover:bg-[#fff2ed] rounded-lg group-hover:opacity-100 opacity-0 transition-opacity">
+                                        <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-slate-400 hover:text-brand hover:bg-brand-soft rounded-lg group-hover:opacity-100 opacity-0 transition-opacity">
                                             <Link href={row.url} target="_blank" className="flex items-center gap-2">
                                                 <Badge variant="outline" className="text-[10px] border-inherit text-inherit uppercase tracking-widest cursor-pointer">
                                                     View Video

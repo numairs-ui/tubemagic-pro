@@ -2,8 +2,61 @@
 
 import { UserButton } from "@clerk/nextjs"
 import Link from "next/link"
-import { LucideLayoutDashboard, LucideVideo, LucideZap, LucideSettings, LucideBarChart3, LucideSparkles, LucideActivity } from "lucide-react"
+import { useState } from "react"
 import { usePathname } from "next/navigation"
+import {
+    LucideLayoutDashboard, LucideSettings, LucideBarChart3, LucideSparkles, LucideActivity,
+    LucideImage, LucideLayers, LucideRefreshCcw, LucideSearch, LucideWand2, LucideMenu, LucideX, LucideZap,
+    type LucideIcon,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+
+interface NavItem {
+    label: string
+    href: string
+    icon: LucideIcon
+    badge?: string
+}
+
+interface NavSection {
+    label?: string
+    items: NavItem[]
+}
+
+// Packaging and Repurposing are the primary workflows, so they sit directly
+// under Overview. Growth diagnostics come next; legacy SEO tools last.
+const NAV: NavSection[] = [
+    { items: [{ label: "Overview", href: "/dashboard", icon: LucideLayoutDashboard }] },
+    {
+        label: "Create",
+        items: [
+            { label: "Packaging Studio", href: "/dashboard/packaging", icon: LucideImage, badge: "CTR" },
+            { label: "Repurposing Studio", href: "/dashboard/repurpose", icon: LucideLayers },
+        ],
+    },
+    {
+        label: "Grow",
+        items: [
+            { label: "Velocity Audit", href: "/dashboard/intelligence/audit", icon: LucideActivity },
+            { label: "Video Revival", href: "/dashboard/revival", icon: LucideRefreshCcw },
+            { label: "Topic Gaps", href: "/dashboard/intelligence/topic-gap", icon: LucideSparkles },
+            { label: "Performance", href: "/dashboard/analytics", icon: LucideBarChart3 },
+        ],
+    },
+    {
+        label: "SEO Toolkit",
+        items: [
+            { label: "Title Optimizer", href: "/dashboard/optimize", icon: LucideWand2 },
+            { label: "Keyword Magic", href: "/dashboard/seo/keywords", icon: LucideSearch },
+            { label: "Rank Tracker", href: "/dashboard/seo/ranks", icon: LucideBarChart3 },
+        ],
+    },
+    { label: "Account", items: [{ label: "Settings", href: "/dashboard/settings", icon: LucideSettings }] },
+]
+
+function isActive(pathname: string, href: string) {
+    return href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
+}
 
 export default function DashboardLayout({
     children,
@@ -11,110 +64,95 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     const pathname = usePathname()
+    const [mobileOpen, setMobileOpen] = useState(false)
 
-    const navItems = [
-        { label: "Overview", href: "/dashboard", icon: LucideLayoutDashboard, active: pathname === "/dashboard" },
-        {
-            label: "SEO Suite",
-            section: true,
-            items: [
-                { label: "Keyword Magic", href: "/dashboard/seo/keywords", icon: LucideVideo, active: pathname === "/dashboard/seo/keywords" },
-                { label: "Rank Tracker", href: "/dashboard/seo/ranks", icon: LucideBarChart3, active: pathname === "/dashboard/seo/ranks" },
-                { label: "Channel Audit", href: "/dashboard/intelligence/audit", icon: LucideActivity, active: pathname === "/dashboard/intelligence/audit" },
-            ]
-        },
-        {
-            label: "Intelligence",
-            section: true,
-            items: [
-                { label: "AI Optimizer", href: "/dashboard/optimize", icon: LucideZap, active: pathname === "/dashboard/optimize" },
-                { label: "Topic Gaps", href: "/dashboard/intelligence/topic-gap", icon: LucideSparkles, active: pathname === "/dashboard/intelligence/topic-gap" },
-                { label: "Competitors", href: "/dashboard/analytics", icon: LucideBarChart3, active: pathname === "/dashboard/analytics" },
-            ]
-        },
-        {
-            label: "Account",
-            section: true,
-            items: [
-                { label: "Settings", href: "/dashboard/settings", icon: LucideSettings, active: pathname === "/dashboard/settings" },
-            ]
-        }
-    ]
+    const currentLabel = NAV.flatMap((s) => s.items).find((i) => isActive(pathname, i.href))?.label || "Dashboard"
+
+    const sidebar = (
+        <>
+            <div className="flex h-16 items-center justify-between border-b px-5">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand shadow-lg shadow-brand/20">
+                        <LucideZap className="h-4 w-4 fill-white text-white" />
+                    </div>
+                    <span className="text-lg font-bold tracking-tight text-ink">TubeMagic <span className="text-brand">Velocity</span></span>
+                </Link>
+                <button className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu">
+                    <LucideX className="h-5 w-5" />
+                </button>
+            </div>
+
+            <nav className="flex-1 space-y-6 overflow-y-auto p-4" aria-label="Dashboard">
+                {NAV.map((section, idx) => (
+                    <div key={idx} className="space-y-1">
+                        {section.label && (
+                            <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{section.label}</p>
+                        )}
+                        {section.items.map((item) => {
+                            const active = isActive(pathname, item.href)
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    aria-current={active ? "page" : undefined}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={cn(
+                                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                                        active ? "bg-brand-soft text-brand" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    )}
+                                >
+                                    <item.icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", active && "text-brand")} />
+                                    <span className="flex-1">{item.label}</span>
+                                    {item.badge && (
+                                        <span className="rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">{item.badge}</span>
+                                    )}
+                                </Link>
+                            )
+                        })}
+                    </div>
+                ))}
+            </nav>
+
+            <div className="flex items-center gap-3 border-t p-4">
+                <UserButton afterSignOutUrl="/" />
+                <div className="text-sm">
+                    <p className="font-medium text-slate-900">Account</p>
+                    <p className="text-xs text-slate-500">Manage profile</p>
+                </div>
+            </div>
+        </>
+    )
 
     return (
         <div className="flex min-h-screen bg-slate-50">
-            {/* Sidebar */}
-            <aside className="w-64 border-r bg-white flex flex-col fixed inset-y-0">
-                <div className="p-6 border-b">
-                    <Link href="/dashboard" className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-[#ff642d] rounded-lg flex items-center justify-center shadow-lg shadow-[#ff642d]/20">
-                            <LucideVideo className="text-white w-5 h-5" />
-                        </div>
-                        <span className="text-xl font-bold tracking-tight text-[#0f172a]">TubeMagic <span className="text-[#ff642d]">Pro</span></span>
-                    </Link>
+            {/* Desktop sidebar */}
+            <aside className="fixed inset-y-0 hidden w-64 flex-col border-r bg-white lg:flex">{sidebar}</aside>
+
+            {/* Mobile drawer */}
+            {mobileOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden">
+                    <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMobileOpen(false)} />
+                    <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-2xl animate-in slide-in-from-left duration-200">{sidebar}</aside>
                 </div>
+            )}
 
-                <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-                    {navItems.map((item, idx) => (
-                        <div key={idx} className="space-y-2">
-                            {item.section ? (
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3">
-                                    {item.label}
-                                </p>
-                            ) : null}
+            <div className="flex min-w-0 flex-1 flex-col lg:ml-64">
+                {/* Mobile top bar */}
+                <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-white/90 px-4 backdrop-blur lg:hidden">
+                    <button onClick={() => setMobileOpen(true)} className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100" aria-label="Open menu">
+                        <LucideMenu className="h-5 w-5" />
+                    </button>
+                    <span className="flex-1 truncate font-bold text-ink">{currentLabel}</span>
+                    <UserButton afterSignOutUrl="/" />
+                </header>
 
-                            {item.items ? (
-                                <div className="space-y-1">
-                                    {item.items.map((sub) => (
-                                        <Link
-                                            key={sub.href}
-                                            href={sub.href}
-                                            className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${sub.active
-                                                ? "bg-[#fff2ed] text-[#ff642d]"
-                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                                }`}
-                                        >
-                                            <sub.icon className={`w-4 h-4 ${sub.active ? "text-[#ff642d]" : ""}`} />
-                                            <span>{sub.label}</span>
-                                        </Link>
-                                    ))}
-                                </div>
-                            ) : (
-                                <Link
-                                    href={item.href!}
-                                    className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${item.active
-                                        ? "bg-[#fff2ed] text-[#ff642d]"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                        }`}
-                                >
-                                    <item.icon className={`w-4 h-4 ${item.active ? "text-[#ff642d]" : ""}`} />
-                                    <span>{item.label}</span>
-                                </Link>
-                            )}
-                        </div>
-                    ))}
-                </nav>
-
-                <div className="p-4 border-t flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <UserButton afterSignOutUrl="/" />
-                        <div className="text-sm">
-                            <p className="font-medium text-slate-900">Account</p>
-                            <p className="text-slate-500 text-xs text-ellipsis overflow-hidden w-32">Manage Profile</p>
-                        </div>
+                <main className="flex-1 px-4 py-6 sm:px-6 lg:p-8">
+                    <div className="mx-auto mb-4 hidden max-w-6xl text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 lg:block">
+                        Dashboard / {currentLabel}
                     </div>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 ml-64 p-8">
-                <div className="max-w-6xl mx-auto uppercase text-[10px] font-bold text-slate-400 tracking-[0.2em] mb-4">
-                    Dashboard / {pathname.split('/').pop()?.replace('-', ' ') || 'Overview'}
-                </div>
-                <div className="max-w-6xl mx-auto">
-                    {children}
-                </div>
-            </main>
+                    <div className="mx-auto max-w-6xl">{children}</div>
+                </main>
+            </div>
         </div>
     )
 }

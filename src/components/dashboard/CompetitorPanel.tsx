@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LucideUsers, LucidePlus, LucideLoader2, LucideTrendingUp, LucideTrophy } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface CompetitorPanelProps {
     channelId: string
@@ -92,8 +93,8 @@ export default function CompetitorPanel({ channelId, competitors }: CompetitorPa
                                         <LucideTrophy className="w-4 h-4 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </CardContent>
                                     <div className="bg-slate-50 px-4 py-2 border-t flex items-center justify-between text-[10px]">
-                                        <span className="text-slate-500 uppercase tracking-wider font-bold">Niche Match</span>
-                                        <span className="text-green-600 font-bold">High (92%)</span>
+                                        <span className="text-slate-500 uppercase tracking-wider font-bold">Status</span>
+                                        <span className="text-green-600 font-bold">Included in topic-gap scans</span>
                                     </div>
                                 </Card>
                             ))}
@@ -109,46 +110,23 @@ export default function CompetitorPanel({ channelId, competitors }: CompetitorPa
                 </div>
             </div>
 
-            {/* Analytics Preview */}
-            <Card className="bg-slate-900 text-white overflow-hidden">
-                <CardHeader className="border-b border-slate-800">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-md flex items-center gap-2">
-                            <LucideTrendingUp className="w-4 h-4 text-green-400" />
-                            Competitor Gap Analysis
-                        </CardTitle>
-                        <span className="text-[10px] font-mono text-slate-400">UPDATED 1H AGO</span>
+            {/* Gap analysis entry point */}
+            <Card className="bg-slate-900 text-white overflow-hidden border-none">
+                <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                        <LucideTrendingUp className="w-5 h-5 text-green-400" />
                     </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <div className="grid gap-8 md:grid-cols-2">
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-slate-400">Release Frequency</span>
-                                    <span className="text-red-400">-12% vs Competitors</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-400 w-[60%]" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-slate-400">SEO Quality Score</span>
-                                    <span className="text-green-400">+8% vs Competitors</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-green-400 w-[85%]" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700 space-y-2">
-                            <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest">AI Opportunity</h4>
-                            <p className="text-xs text-slate-300 leading-relaxed">
-                                Your competitors are seeing 2.4x more engagement on <span className="text-white font-medium">&quot;System Design&quot;</span> topics. We recommend prioritizing these ideas in your next release.
-                            </p>
-                        </div>
+                    <div className="flex-1 space-y-1">
+                        <p className="font-bold">Competitor Gap Analysis</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                            {competitors.length > 0
+                                ? `Compare your catalog with the top recent videos from ${competitors.length} tracked channel${competitors.length === 1 ? "" : "s"} to find topics you haven't covered.`
+                                : "Track at least one competitor, then scan for topics that are working for them but missing from your channel."}
+                        </p>
                     </div>
+                    <Button asChild disabled={competitors.length === 0} className="bg-brand hover:bg-brand-hover font-bold shrink-0">
+                        <Link href="/dashboard/intelligence/topic-gap">Run topic-gap scan</Link>
+                    </Button>
                 </CardContent>
             </Card>
         </div>

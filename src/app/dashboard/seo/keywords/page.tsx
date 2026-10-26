@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LucideSearch, LucideZap, LucideTrendingUp, LucideTarget, LucideBarChart3, LucideLoader2, LucideArrowRight, LucideInfo } from "lucide-react"
@@ -60,7 +60,7 @@ export default function KeywordMagicPage() {
         <div className="space-y-8 pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-[#0f172a]">Keyword Magic Tool</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-ink">Keyword Magic Tool</h1>
                     <p className="text-slate-500 text-lg font-medium">Deep YouTube search analytics & competitive difficulty.</p>
                 </div>
                 <form onSubmit={handleSearch} className="flex w-full md:w-auto gap-2">
@@ -68,12 +68,12 @@ export default function KeywordMagicPage() {
                         <LucideSearch className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                         <Input
                             placeholder="Enter keyword (e.g. Next.js Tutorial)"
-                            className="pl-9 h-11 border-slate-200 focus:ring-[#ff642d] focus:border-[#ff642d]"
+                            className="pl-9 h-11 border-slate-200 focus:ring-brand focus:border-brand"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
                     </div>
-                    <Button type="submit" disabled={isLoading} className="bg-[#ff642d] hover:bg-[#e85a28] h-11 px-6 shadow-lg shadow-[#ff642d]/20">
+                    <Button type="submit" disabled={isLoading} className="bg-brand hover:bg-brand-hover h-11 px-6 shadow-lg shadow-brand/20">
                         {isLoading ? <LucideLoader2 className="w-4 h-4 animate-spin" /> : "Analyze"}
                     </Button>
                 </form>
@@ -93,7 +93,7 @@ export default function KeywordMagicPage() {
 
             {isLoading && (
                 <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                    <LucideLoader2 className="w-10 h-10 animate-spin text-[#ff642d]" />
+                    <LucideLoader2 className="w-10 h-10 animate-spin text-brand" />
                     <p className="text-slate-500 font-medium animate-pulse">Aggregating YouTube search data & AI Analysis...</p>
                 </div>
             )}
@@ -117,7 +117,7 @@ export default function KeywordMagicPage() {
                             <CardContent className="pt-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Difficulty</span>
-                                    <LucideTrendingUp className="w-4 h-4 text-[#ff642d]" />
+                                    <LucideTrendingUp className="w-4 h-4 text-brand" />
                                 </div>
                                 <div className="flex items-baseline gap-2">
                                     <div className="text-3xl font-extrabold text-slate-900">{results.metrics.difficulty}</div>
@@ -140,7 +140,7 @@ export default function KeywordMagicPage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="border-none shadow-sm bg-[#0f172a] text-white">
+                        <Card className="border-none shadow-sm bg-ink text-white">
                             <CardContent className="pt-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opportunity</span>
@@ -154,10 +154,10 @@ export default function KeywordMagicPage() {
 
                     {/* AI Analysis & Strategy */}
                     <Card className="border-none shadow-sm bg-white overflow-hidden">
-                        <div className="h-1 bg-gradient-to-r from-[#ff642d] to-blue-500" />
+                        <div className="h-1 bg-gradient-to-r from-brand to-blue-500" />
                         <CardHeader>
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-[#fff2ed] rounded-lg flex items-center justify-center text-[#ff642d]">
+                                <div className="w-8 h-8 bg-brand-soft rounded-lg flex items-center justify-center text-brand">
                                     <LucideInfo className="w-4 h-4" />
                                 </div>
                                 <CardTitle className="text-lg">SEO Strategy Analysis</CardTitle>
@@ -172,7 +172,7 @@ export default function KeywordMagicPage() {
 
                     {/* Related Keywords Magic Table */}
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-[#0f172a] flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-ink flex items-center gap-2">
                             Related Keywords
                             <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest border-slate-200 text-slate-500 bg-white">
                                 {results.related.length} Suggestions
@@ -195,7 +195,7 @@ export default function KeywordMagicPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-slate-700">{item.keyword}</span>
-                                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 group-hover:text-[#ff642d] transition-colors cursor-pointer" onClick={() => setQuery(item.keyword)}>Analyze Trend</span>
+                                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 group-hover:text-brand transition-colors cursor-pointer" onClick={() => setQuery(item.keyword)}>Analyze Trend</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right font-mono text-xs text-slate-500">{item.volume}</td>
@@ -220,14 +220,14 @@ export default function KeywordMagicPage() {
                                                             setQuery(item.keyword)
                                                             window.scrollTo({ top: 0, behavior: 'smooth' })
                                                         }}
-                                                        className="h-8 w-8 p-0 text-slate-400 hover:text-[#ff642d] hover:bg-[#fff2ed] group-hover:opacity-100 opacity-0 transition-all duration-300 rounded-lg"
+                                                        className="h-8 w-8 p-0 text-slate-400 hover:text-brand hover:bg-brand-soft group-hover:opacity-100 opacity-0 transition-all duration-300 rounded-lg"
                                                     >
                                                         <LucideArrowRight className="w-4 h-4" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-[#ff642d] bg-[#fff2ed] hover:bg-[#ff642d] hover:text-white transition-all duration-300 rounded-lg group-hover:opacity-100 opacity-0"
+                                                        className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-brand bg-brand-soft hover:bg-brand hover:text-white transition-all duration-300 rounded-lg group-hover:opacity-100 opacity-0"
                                                         asChild
                                                     >
                                                         <Link href="/dashboard/seo/ranks">

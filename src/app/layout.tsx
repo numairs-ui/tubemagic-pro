@@ -14,8 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TubeMagic Pro",
-  description: "Scale your YouTube channel with AI-powered SEO insights and competitive intelligence",
+  title: "TubeMagic Velocity | High-CTR Creator Copilot & Packaging Suite",
+  description: "Grade YouTube thumbnails and titles with GPT-4o Vision, repurpose videos into Shorts, and revive decaying videos. Free CTR grader, no signup.",
+  openGraph: {
+    title: "TubeMagic Velocity",
+    description: "Win the click before you hit publish. Free thumbnail & title CTR grader.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
