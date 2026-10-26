@@ -51,11 +51,20 @@ export async function POST() {
                 },
             ],
             mode: 'subscription',
+            allow_promotion_codes: true,
             success_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/dashboard/settings?success=true`,
             cancel_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/dashboard/settings?canceled=true`,
             metadata: {
                 clerkUserId: userId
-            }
+            },
+            // Copied onto the subscription so customer.subscription.* webhooks can
+            // resolve the user even before stripe_customer_id is stored.
+            subscription_data: {
+                metadata: { clerkUserId: userId },
+                ...(Number(process.env.STRIPE_TRIAL_DAYS) > 0
+                    ? { trial_period_days: Number(process.env.STRIPE_TRIAL_DAYS) }
+                    : {}),
+            },
         })
 
         return NextResponse.json({ url: session.url })

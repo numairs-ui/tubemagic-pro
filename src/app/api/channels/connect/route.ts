@@ -1,21 +1,26 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { currentUser } from '@clerk/nextjs/server'
+import { NextResponse, after } from 'next/server'
+import { z } from 'zod'
 import { supabaseAdmin } from '@/lib/supabase'
-import { getChannelData, getChannelVideos, getVideoStats, extractChannelIdOrHandle } from '@/lib/youtube'
+import { getChannelData, extractChannelIdOrHandle } from '@/lib/youtube'
+import { ApiError, errorResponse, parseBody, requireUserId } from '@/lib/api'
+import { enforceRateLimit } from '@/lib/rate-limit'
+import { syncChannelVideos } from '@/lib/channel-sync'
+
+export const maxDuration = 60
+
+const bodySchema = z.object({
+    channelId: z.string().trim().min(2, 'Channel ID, handle, or URL is required').max(200),
+})
 
 export async function POST(req: Request) {
     try {
-        const { userId } = await auth()
+        const userId = await requireUserId()
         const userDetails = await currentUser()
+        if (!userDetails) throw new ApiError(401, 'unauthorized', 'Unauthorized')
 
-        if (!userId || !userDetails) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const { channelId: rawInput } = await req.json()
-        if (!rawInput) {
-            return NextResponse.json({ error: 'Channel ID, handle, or URL is required' }, { status: 400 })
-        }
+        await enforceRateLimit(`connect:${userId}`, 10, 60 * 60, 'Too many connection attempts. Try again in an hour.')
+        const { channelId: rawInput } = await parseBody(req, bodySchema)
 
         // 1. Resolve handle/URL to a format getChannelData can use
         const identifier = extractChannelIdOrHandle(rawInput)
@@ -36,7 +41,17 @@ export async function POST(req: Request) {
 
         if (userError || !user) {
             console.error('Supabase user error:', userError)
-            return NextResponse.json({ error: 'Failed to sync user with database.' }, { status: 500 })
+            throw new ApiError(500, 'user_sync_failed', 'Failed to sync user with database.')
+        }
+
+        // A channel already connected by a different account must not be taken over.
+        const { data: existing } = await supabaseAdmin
+            .from('channels')
+            .select('user_id')
+            .eq('youtube_channel_id', channelData.id)
+            .maybeSingle()
+        if (existing && existing.user_id !== user.id) {
+            throw new ApiError(409, 'channel_taken', 'This channel is already connected to another account.')
         }
 
         // 3. Save channel to Supabase
@@ -58,9 +73,16 @@ export async function POST(req: Request) {
 
         if (channelError) throw channelError
 
-        // 4. Trigger video ingestion (async - don't wait for completion in the response)
-        // In a production app, this should be a background job (e.g., Inngest or Upstash)
-        ingestVideos(channel.id, channelData.id).catch(err => console.error('Ingestion error:', err))
+        // 4. Ingest videos after the response is sent. `after` keeps the
+        // serverless function alive until the work finishes.
+        after(async () => {
+            try {
+                const { synced } = await syncChannelVideos(channel.id, channelData.id)
+                console.log(`Ingested ${synced} videos for channel ${channelData.id}`)
+            } catch (err) {
+                console.error(`Error ingesting videos for ${channelData.id}:`, err)
+            }
+        })
 
         return NextResponse.json({
             success: true,
@@ -69,51 +91,6 @@ export async function POST(req: Request) {
         })
 
     } catch (error: unknown) {
-        console.error('Connect channel error:', error)
-        return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'Failed to connect channel' },
-            { status: 500 }
-        )
+        return errorResponse(error, 'channels/connect')
     }
-}
-
-async function ingestVideos(dbChannelId: string, youtubeChannelId: string) {
-    try {
-        // Fetch last 50 videos
-        const videos = await getChannelVideos(youtubeChannelId, 50)
-
-        for (const video of videos) {
-            // Get detailed stats for each video (tags, duration, views)
-            const stats = await getVideoStats(video.videoId)
-
-            await supabaseAdmin.from('videos').upsert({
-                channel_id: dbChannelId,
-                youtube_video_id: video.videoId,
-                title: video.title,
-                description: video.description,
-                published_at: video.publishedAt,
-                view_count: stats.viewCount,
-                like_count: stats.likeCount,
-                comment_count: stats.commentCount,
-                duration: parseISO8601Duration(stats.duration),
-                tags: stats.tags,
-                thumbnail_url: video.thumbnailUrl,
-                fetched_at: new Date().toISOString(),
-            }, { onConflict: 'youtube_video_id' })
-        }
-
-        console.log(`Successfully ingested videos for channel ${youtubeChannelId}`)
-    } catch (error) {
-        console.error(`Error ingesting videos for ${youtubeChannelId}:`, error)
-    }
-}
-
-// Utility to convert ISO 8601 duration (like PT1M30S) to seconds
-function parseISO8601Duration(duration: string): number {
-    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    if (!match) return 0;
-    const hours = parseInt(match[1] || '0');
-    const minutes = parseInt(match[2] || '0');
-    const seconds = parseInt(match[3] || '0');
-    return hours * 3600 + minutes * 60 + seconds;
 }

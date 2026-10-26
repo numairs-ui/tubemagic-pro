@@ -28,6 +28,9 @@ function SettingsContent() {
     const [isUpgrading, setIsUpgrading] = useState(false)
     const [isSavingNotifications, setIsSavingNotifications] = useState(false)
     const [plan, setPlan] = useState("Free")
+    const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
+    const [periodEnd, setPeriodEnd] = useState<string | null>(null)
+    const [isOpeningPortal, setIsOpeningPortal] = useState(false)
     const [emailNotifications, setEmailNotifications] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -49,10 +52,27 @@ function SettingsContent() {
             const data = await res.json()
             if (data.plan) setPlan(data.plan.charAt(0).toUpperCase() + data.plan.slice(1))
             if (data.email_notifications !== undefined) setEmailNotifications(data.email_notifications)
+            setSubscriptionStatus(data.subscription_status ?? null)
+            setPeriodEnd(data.current_period_end ?? null)
         } catch (err) {
             console.error("Failed to fetch settings:", err)
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handleManageBilling = async () => {
+        setIsOpeningPortal(true)
+        setError(null)
+        try {
+            const res = await fetch("/api/billing/portal", { method: "POST" })
+            const data = await res.json()
+            if (data.url) window.location.href = data.url
+            else setError(data.error || "Could not open the billing portal.")
+        } catch {
+            setError("Could not open the billing portal.")
+        } finally {
+            setIsOpeningPortal(false)
         }
     }
 
@@ -68,7 +88,7 @@ function SettingsContent() {
             } else {
                 setError(data.error || "Failed to initiate checkout.")
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred.")
         } finally {
             setIsUpgrading(false)
@@ -89,7 +109,7 @@ function SettingsContent() {
                 setEmailNotifications(!checked) // Revert on failure
                 setError(data.error || "Failed to update notification settings.")
             }
-        } catch (err) {
+        } catch {
             setEmailNotifications(!checked) // Revert on failure
             setError("Failed to update notification settings.")
         } finally {
@@ -132,22 +152,34 @@ function SettingsContent() {
                     </CardHeader>
                     <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-6 space-y-4 sm:space-y-0">
                         <div className="text-sm">
-                            <p className="font-bold text-slate-900 text-lg">CodeTube Pro</p>
-                            <p className="text-slate-500">Unlock unlimited AI ideas, bulk optimization, and competitor track velocity alerts.</p>
+                            <p className="font-bold text-slate-900 text-lg">TubeMagic Velocity Pro</p>
+                            <p className="text-slate-500">100 CTR grades a day, higher AI limits, revival packages and competitor topic-gap scans.</p>
+                            {subscriptionStatus === "past_due" && (
+                                <p className="mt-2 text-amber-700 font-medium">Your last payment failed. Update your card to keep Pro.</p>
+                            )}
+                            {periodEnd && plan !== "Free" && (
+                                <p className="mt-1 text-xs text-slate-400">Current period ends {new Date(periodEnd).toLocaleDateString()}</p>
+                            )}
                         </div>
                         {plan === "Free" ? (
                             <Button
                                 onClick={handleUpgrade}
                                 disabled={isUpgrading}
-                                className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 px-8 h-11 font-bold"
+                                className="bg-brand hover:bg-brand-hover shadow-lg shadow-brand/20 px-8 h-11 font-bold"
                             >
                                 {isUpgrading ? <LucideLoader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                 Upgrade Now
                             </Button>
                         ) : (
-                            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-100">
-                                <LucideCheckCircle2 className="w-4 h-4" />
-                                Active
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-100">
+                                    <LucideCheckCircle2 className="w-4 h-4" />
+                                    {subscriptionStatus === "trialing" ? "Trial" : "Active"}
+                                </div>
+                                <Button variant="outline" onClick={handleManageBilling} disabled={isOpeningPortal} className="h-10 font-bold">
+                                    {isOpeningPortal && <LucideLoader2 className="w-4 h-4 animate-spin" />}
+                                    Manage billing
+                                </Button>
                             </div>
                         )}
                     </CardContent>
@@ -197,7 +229,7 @@ function SettingsContent() {
                             </div>
                         </div>
                         <div className="flex items-center justify-between text-sm p-3 border rounded-lg">
-                            <span className="font-medium text-slate-700">OpenAI GPT-4o-mini</span>
+                            <span className="font-medium text-slate-700">OpenAI GPT-4o Vision + GPT-4o-mini</span>
                             <div className="flex items-center gap-2 text-green-600 bg-green-50 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-green-100">
                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                                 Connected

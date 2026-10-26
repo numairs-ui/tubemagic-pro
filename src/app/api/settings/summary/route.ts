@@ -9,15 +9,23 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        // select('*') so this works whether or not the velocity migration's
+        // subscription columns exist yet.
         const { data: user, error } = await supabaseAdmin
             .from('users')
-            .select('plan, email_notifications')
+            .select('*')
             .eq('clerk_user_id', userId)
-            .single()
+            .maybeSingle()
 
         if (error) throw error
 
-        return NextResponse.json(user)
+        return NextResponse.json({
+            plan: user?.plan || 'free',
+            email_notifications: user?.email_notifications ?? false,
+            subscription_status: user?.subscription_status ?? null,
+            current_period_end: user?.current_period_end ?? null,
+            has_billing_account: Boolean(user?.stripe_customer_id),
+        })
 
     } catch (error: unknown) {
         console.error('Fetch settings error:', error)

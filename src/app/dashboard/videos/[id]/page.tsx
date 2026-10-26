@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getUserChannels } from '@/lib/account'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,7 +26,10 @@ export default async function VideoDetailsPage({ params }: { params: Promise<{ i
         .eq('id', id)
         .single()
 
-    if (videoError || !video) {
+    // Only show videos from channels this user owns.
+    const ownsVideo = !videoError && video && (await getUserChannels(userId)).some((c) => c.id === video.channel_id)
+
+    if (!ownsVideo) {
         return (
             <div className="text-center py-20">
                 <h2 className="text-xl font-semibold">Video not found</h2>
